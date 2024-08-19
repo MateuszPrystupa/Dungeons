@@ -49,7 +49,7 @@ void UGrabber::Grab()
 	{
 		return;
 	}
-	
+	 
 	FHitResult HitResult;
 	bool HasHit = GetGrabbableInReach(HitResult);
 	if (HasHit)
