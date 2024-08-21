@@ -2,6 +2,7 @@
 
 
 #include "TriggerComponent.h"
+#include "Engine/EngineTypes.h"
 
 UTriggerComponent::UTriggerComponent()
 {
@@ -20,12 +21,23 @@ void UTriggerComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAct
     AActor* Actor = GetAcceptableActor();
     if(Actor != nullptr)
     {
-        UE_LOG(LogTemp, Display, TEXT("Unlocking"));
+        UPrimitiveComponent* Component = Cast<UPrimitiveComponent>(Actor->GetRootComponent());
+        if (Component != nullptr)
+        {
+           Component->SetSimulatePhysics(false);
+        }
+        Actor->AttachToComponent(this, FAttachmentTransformRules::KeepWorldTransform);
+        Movers->SetShouldMove(true);
     }
     else
     {
-        UE_LOG(LogTemp, Display, TEXT("Relocking"));
+        Movers->SetShouldMove(false);
     }
+}
+
+void UTriggerComponent::SetMover(UMovers* NewMovers)
+{
+    Movers = NewMovers;
 }
 
 AActor* UTriggerComponent::GetAcceptableActor() const
@@ -34,7 +46,9 @@ AActor* UTriggerComponent::GetAcceptableActor() const
     GetOverlappingActors(Actors);
     for (AActor* Actor : Actors)
     {
-        if(Actor->ActorHasTag(AcceptableActorTag))
+        bool HasAcceptableTag = Actor->ActorHasTag(AcceptableActorTag);
+        bool IsGrabbed = Actor->ActorHasTag("Grabbed");
+        if(HasAcceptableTag && !IsGrabbed)
         {
             return Actor;
         }
